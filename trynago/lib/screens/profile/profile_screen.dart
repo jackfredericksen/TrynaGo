@@ -12,15 +12,17 @@ class ProfileScreen extends ConsumerWidget {
     final likedEvents = ref.watch(likedEventsProvider);
 
     if (currentUser == null) {
-      return const Scaffold(
+      return Scaffold(
         body: Center(
-          child: CircularProgressIndicator(),
+          child: CircularProgressIndicator(
+            color: Theme.of(context).colorScheme.primary,
+          ),
         ),
       );
     }
 
     return Scaffold(
-      backgroundColor: Colors.grey[50],
+      // Remove explicit background color to use theme
       appBar: AppBar(
         title: const Text(
           'Profile',
@@ -30,7 +32,7 @@ class ProfileScreen extends ConsumerWidget {
           ),
         ),
         centerTitle: true,
-        backgroundColor: Colors.white,
+        // Remove explicit backgroundColor to use theme
         elevation: 0,
         actions: [
           IconButton(
@@ -46,7 +48,7 @@ class ProfileScreen extends ConsumerWidget {
           children: [
             // Profile Header
             Container(
-              color: Colors.white,
+              color: Theme.of(context).colorScheme.surface,
               padding: const EdgeInsets.all(24),
               child: Column(
                 children: [
@@ -55,7 +57,7 @@ class ProfileScreen extends ConsumerWidget {
                     children: [
                       CircleAvatar(
                         radius: 50,
-                        backgroundColor: Theme.of(context).primaryColor,
+                        backgroundColor: Theme.of(context).colorScheme.primary,
                         child: currentUser.profilePictureUrl != null
                             ? ClipCircle(
                                 child: Image.network(
@@ -67,10 +69,10 @@ class ProfileScreen extends ConsumerWidget {
                               )
                             : Text(
                                 currentUser.name[0].toUpperCase(),
-                                style: const TextStyle(
+                                style: TextStyle(
                                   fontSize: 36,
                                   fontWeight: FontWeight.bold,
-                                  color: Colors.white,
+                                  color: Theme.of(context).colorScheme.onPrimary,
                                 ),
                               ),
                       ),
@@ -79,14 +81,17 @@ class ProfileScreen extends ConsumerWidget {
                         right: 0,
                         child: Container(
                           decoration: BoxDecoration(
-                            color: Theme.of(context).primaryColor,
+                            color: Theme.of(context).colorScheme.primary,
                             shape: BoxShape.circle,
-                            border: Border.all(color: Colors.white, width: 2),
+                            border: Border.all(
+                              color: Theme.of(context).colorScheme.surface, 
+                              width: 2
+                            ),
                           ),
                           child: IconButton(
-                            icon: const Icon(
+                            icon: Icon(
                               Icons.camera_alt,
-                              color: Colors.white,
+                              color: Theme.of(context).colorScheme.onPrimary,
                               size: 16,
                             ),
                             onPressed: () {
@@ -107,10 +112,10 @@ class ProfileScreen extends ConsumerWidget {
                   // Name and Age
                   Text(
                     currentUser.name,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
-                      color: Colors.black87,
+                      color: Theme.of(context).colorScheme.onSurface,
                     ),
                   ),
                   
@@ -120,7 +125,7 @@ class ProfileScreen extends ConsumerWidget {
                     '${currentUser.age} • ${currentUser.location.city ?? 'Unknown location'}',
                     style: TextStyle(
                       fontSize: 16,
-                      color: Colors.grey[600],
+                      color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
                     ),
                   ),
                   
@@ -130,7 +135,7 @@ class ProfileScreen extends ConsumerWidget {
                       currentUser.bio!,
                       style: TextStyle(
                         fontSize: 16,
-                        color: Colors.grey[700],
+                        color: Theme.of(context).colorScheme.onSurface.withOpacity(0.8),
                         height: 1.4,
                       ),
                       textAlign: TextAlign.center,
@@ -144,24 +149,27 @@ class ProfileScreen extends ConsumerWidget {
             
             // Stats Section
             Container(
-              color: Colors.white,
+              color: Theme.of(context).colorScheme.surface,
               padding: const EdgeInsets.all(24),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
                   _buildStatItem(
+                    context,
                     'Events Liked',
                     '${likedEvents.length}',
                     Icons.favorite,
                     Colors.red,
                   ),
                   _buildStatItem(
+                    context,
                     'Events Joined',
                     '${currentUser.attendingEvents.length}',
                     Icons.event,
                     Colors.blue,
                   ),
                   _buildStatItem(
+                    context,
                     'Days Active',
                     '${DateTime.now().difference(currentUser.createdAt).inDays}',
                     Icons.calendar_today,
@@ -176,7 +184,7 @@ class ProfileScreen extends ConsumerWidget {
             // Interests Section
             if (currentUser.interests.isNotEmpty) ...[
               Container(
-                color: Colors.white,
+                color: Theme.of(context).colorScheme.surface,
                 padding: const EdgeInsets.all(24),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -186,7 +194,7 @@ class ProfileScreen extends ConsumerWidget {
                       style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
-                        color: Colors.grey[800],
+                        color: Theme.of(context).colorScheme.onSurface,
                       ),
                     ),
                     const SizedBox(height: 16),
@@ -200,16 +208,16 @@ class ProfileScreen extends ConsumerWidget {
                             vertical: 8,
                           ),
                           decoration: BoxDecoration(
-                            color: Theme.of(context).primaryColor.withOpacity(0.1),
+                            color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
                             borderRadius: BorderRadius.circular(20),
                             border: Border.all(
-                              color: Theme.of(context).primaryColor.withOpacity(0.3),
+                              color: Theme.of(context).colorScheme.primary.withOpacity(0.3),
                             ),
                           ),
                           child: Text(
                             interest,
                             style: TextStyle(
-                              color: Theme.of(context).primaryColor,
+                              color: Theme.of(context).colorScheme.primary,
                               fontWeight: FontWeight.w500,
                             ),
                           ),
@@ -224,10 +232,11 @@ class ProfileScreen extends ConsumerWidget {
             
             // Menu Section
             Container(
-              color: Colors.white,
+              color: Theme.of(context).colorScheme.surface,
               child: Column(
                 children: [
                   _buildMenuTile(
+                    context,
                     icon: Icons.edit,
                     title: 'Edit Profile',
                     onTap: () {
@@ -239,6 +248,7 @@ class ProfileScreen extends ConsumerWidget {
                     },
                   ),
                   _buildMenuTile(
+                    context,
                     icon: Icons.notifications_outlined,
                     title: 'Notifications',
                     onTap: () {
@@ -250,6 +260,7 @@ class ProfileScreen extends ConsumerWidget {
                     },
                   ),
                   _buildMenuTile(
+                    context,
                     icon: Icons.location_on_outlined,
                     title: 'Location Settings',
                     onTap: () {
@@ -261,6 +272,7 @@ class ProfileScreen extends ConsumerWidget {
                     },
                   ),
                   _buildMenuTile(
+                    context,
                     icon: Icons.help_outline,
                     title: 'Help & Support',
                     onTap: () {
@@ -272,6 +284,7 @@ class ProfileScreen extends ConsumerWidget {
                     },
                   ),
                   _buildMenuTile(
+                    context,
                     icon: Icons.privacy_tip_outlined,
                     title: 'Privacy Policy',
                     onTap: () {
@@ -283,6 +296,7 @@ class ProfileScreen extends ConsumerWidget {
                     },
                   ),
                   _buildMenuTile(
+                    context,
                     icon: Icons.logout,
                     title: 'Sign Out',
                     textColor: Colors.red,
@@ -299,7 +313,7 @@ class ProfileScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildStatItem(String label, String value, IconData icon, Color color) {
+  Widget _buildStatItem(BuildContext context, String label, String value, IconData icon, Color color) {
     return Column(
       children: [
         Container(
@@ -317,24 +331,25 @@ class ProfileScreen extends ConsumerWidget {
         const SizedBox(height: 8),
         Text(
           value,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 20,
             fontWeight: FontWeight.bold,
-            color: Colors.black87,
+            color: Theme.of(context).colorScheme.onSurface,
           ),
         ),
         Text(
           label,
           style: TextStyle(
             fontSize: 12,
-            color: Colors.grey[600],
+            color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
           ),
         ),
       ],
     );
   }
 
-  Widget _buildMenuTile({
+  Widget _buildMenuTile(
+    BuildContext context, {
     required IconData icon,
     required String title,
     required VoidCallback onTap,
@@ -343,19 +358,19 @@ class ProfileScreen extends ConsumerWidget {
     return ListTile(
       leading: Icon(
         icon,
-        color: textColor ?? Colors.grey[700],
+        color: textColor ?? Theme.of(context).colorScheme.onSurface.withOpacity(0.8),
       ),
       title: Text(
         title,
         style: TextStyle(
-          color: textColor ?? Colors.black87,
+          color: textColor ?? Theme.of(context).colorScheme.onSurface,
           fontWeight: FontWeight.w500,
         ),
       ),
       trailing: Icon(
         Icons.arrow_forward_ios,
         size: 16,
-        color: Colors.grey[400],
+        color: Theme.of(context).colorScheme.onSurface.withOpacity(0.5),
       ),
       onTap: onTap,
     );
@@ -364,7 +379,7 @@ class ProfileScreen extends ConsumerWidget {
   void _showSettingsBottomSheet(BuildContext context, WidgetRef ref) {
     showModalBottomSheet(
       context: context,
-      backgroundColor: Colors.white,
+      backgroundColor: Theme.of(context).colorScheme.surface,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.only(
           topLeft: Radius.circular(20),
@@ -380,36 +395,53 @@ class ProfileScreen extends ConsumerWidget {
               width: 40,
               height: 4,
               decoration: BoxDecoration(
-                color: Colors.grey[300],
+                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.3),
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
             const SizedBox(height: 20),
-            const Text(
+            Text(
               'Settings',
               style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
+                color: Theme.of(context).colorScheme.onSurface,
               ),
             ),
             const SizedBox(height: 20),
             ListTile(
-              leading: const Icon(Icons.dark_mode_outlined),
-              title: const Text('Dark Mode'),
+              leading: Icon(
+                Icons.dark_mode_outlined,
+                color: Theme.of(context).colorScheme.onSurface,
+              ),
+              title: Text(
+                'Dark Mode',
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.onSurface,
+                ),
+              ),
               trailing: Switch(
-                value: false,
+                value: Theme.of(context).brightness == Brightness.dark,
                 onChanged: (value) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
-                      content: Text('Dark mode coming soon!'),
+                      content: Text('Theme switching coming soon!'),
                     ),
                   );
                 },
               ),
             ),
             ListTile(
-              leading: const Icon(Icons.notifications_outlined),
-              title: const Text('Push Notifications'),
+              leading: Icon(
+                Icons.notifications_outlined,
+                color: Theme.of(context).colorScheme.onSurface,
+              ),
+              title: Text(
+                'Push Notifications',
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.onSurface,
+                ),
+              ),
               trailing: Switch(
                 value: true,
                 onChanged: (value) {

@@ -33,6 +33,11 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen>
       parent: _buttonAnimationController,
       curve: Curves.easeInOut,
     ));
+
+    // Load events when screen initializes
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadEvents();
+    });
   }
 
   @override
@@ -41,12 +46,21 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen>
     super.dispose();
   }
 
+  void _loadEvents() {
+    final currentUser = ref.read(currentUserProvider);
+    ref.read(eventsProvider.notifier).loadEvents(
+      userLocation: currentUser?.location,
+    );
+  }
+
   bool _onSwipe(
     int previousIndex,
     int? currentIndex,
     CardSwiperDirection direction,
   ) {
-    final events = ref.read(eventsProvider);
+    final eventsState = ref.read(eventsProvider);
+    final events = eventsState.events;
+    
     if (previousIndex < events.length) {
       final event = events[previousIndex];
       
@@ -61,6 +75,7 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen>
 
   void _handleLike(Event event) {
     ref.read(currentUserProvider.notifier).addLikedEvent(event.id);
+    ref.read(eventsProvider.notifier).likeEvent(event.id);
     
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -85,6 +100,7 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen>
 
   void _handleSuperLike(Event event) {
     ref.read(currentUserProvider.notifier).addLikedEvent(event.id);
+    ref.read(eventsProvider.notifier).likeEvent(event.id);
     
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -128,11 +144,12 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen>
 
   @override
   Widget build(BuildContext context) {
-    final events = ref.watch(eventsProvider);
+    final eventsState = ref.watch(eventsProvider);
     final currentUser = ref.watch(currentUserProvider);
+    final events = eventsState.events;
 
     return Scaffold(
-      backgroundColor: Colors.grey[50],
+      // Remove explicit background color to use theme
       appBar: AppBar(
         title: const Text(
           'Discover',
@@ -142,7 +159,7 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen>
           ),
         ),
         centerTitle: true,
-        backgroundColor: Colors.white,
+        // Remove explicit backgroundColor to use theme
         elevation: 0,
         actions: [
           IconButton(
@@ -165,180 +182,233 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen>
           ),
         ],
       ),
-      body: events.isEmpty
-          ? _buildEmptyState()
-          : Column(
-              children: [
-                // Location indicator
-                if (currentUser?.location.city != null)
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 8,
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.location_on,
-                          size: 16,
-                          color: Colors.grey[600],
-                        ),
-                        const SizedBox(width: 4),
-                        Text(
-                          'Activities near ${currentUser!.location.city}',
-                          style: TextStyle(
-                            color: Colors.grey[600],
-                            fontSize: 14,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                
-                // Card swiper
-                Expanded(
-                  child: CardSwiper(
-                    controller: controller,
-                    cardsCount: events.length,
-                    onSwipe: _onSwipe,
-                    onUndo: (int? previousIndex, int currentIndex,
-                        CardSwiperDirection direction) {
-                      // Handle undo if needed
-                      return true;
-                    },
-                    numberOfCardsDisplayed: 3,
-                    backCardOffset: const Offset(40, 40),
-                    padding: const EdgeInsets.all(24.0),
-                    cardBuilder: (
-                      context,
-                      index,
-                      horizontalThresholdPercentage,
-                      verticalThresholdPercentage,
-                    ) {
-                      return EventCard(
-                        event: events[index],
-                        onSuperLike: () => _handleSuperLike(events[index]),
-                      );
-                    },
-                  ),
-                ),
-                
-                // Action buttons
-                Container(
-                  padding: const EdgeInsets.all(24),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      // Pass button
-                      AnimatedBuilder(
-                        animation: _buttonAnimation,
-                        builder: (context, child) {
-                          return Transform.scale(
-                            scale: _buttonAnimation.value,
-                            child: Container(
-                              width: 60,
-                              height: 60,
-                              decoration: BoxDecoration(
-                                color: Colors.white,
-                                shape: BoxShape.circle,
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.black.withOpacity(0.1),
-                                    blurRadius: 10,
-                                    offset: const Offset(0, 5),
-                                  ),
-                                ],
-                              ),
-                              child: IconButton(
-                                icon: const Icon(
-                                  Icons.close,
-                                  color: Colors.red,
-                                  size: 30,
+      body: eventsState.isLoading
+          ? _buildLoadingState()
+          : events.isEmpty
+              ? _buildEmptyState()
+              : Column(
+                  children: [
+                    // Error message if any
+                    if (eventsState.error != null)
+                      Container(
+                        width: double.infinity,
+                        color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+                        padding: const EdgeInsets.all(8),
+                        child: Row(
+                          children: [
+                            Icon(Icons.info_outline, 
+                                 color: Theme.of(context).colorScheme.primary, size: 16),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                eventsState.error!,
+                                style: TextStyle(
+                                  color: Theme.of(context).colorScheme.primary,
+                                  fontSize: 12,
                                 ),
-                                onPressed: _onTapPass,
                               ),
                             ),
-                          );
-                        },
-                      ),
-                      
-                      // Undo button (if available)
-                      Container(
-                        width: 50,
-                        height: 50,
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          shape: BoxShape.circle,
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.1),
-                              blurRadius: 8,
-                              offset: const Offset(0, 3),
+                            GestureDetector(
+                              onTap: () {
+                                ref.read(eventsProvider.notifier).clearError();
+                              },
+                              child: Icon(Icons.close, 
+                                         color: Theme.of(context).colorScheme.primary, size: 16),
                             ),
                           ],
                         ),
-                        child: IconButton(
-                          icon: Icon(
-                            Icons.undo,
-                            color: Colors.grey[600],
-                            size: 24,
-                          ),
-                          onPressed: () {
-                            controller.undo();
-                          },
-                        ),
                       ),
-                      
-                      // Like button
-                      AnimatedBuilder(
-                        animation: _buttonAnimation,
-                        builder: (context, child) {
-                          return Transform.scale(
-                            scale: _buttonAnimation.value,
-                            child: Container(
-                              width: 60,
-                              height: 60,
-                              decoration: BoxDecoration(
-                                color: Colors.white,
-                                shape: BoxShape.circle,
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.black.withOpacity(0.1),
-                                    blurRadius: 10,
-                                    offset: const Offset(0, 5),
-                                  ),
-                                ],
-                              ),
-                              child: IconButton(
-                                icon: const Icon(
-                                  Icons.favorite,
-                                  color: Colors.green,
-                                  size: 30,
-                                ),
-                                onPressed: _onTapLike,
+                    
+                    // Location indicator
+                    if (currentUser?.location.city != null)
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 8,
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.location_on,
+                              size: 16,
+                              color: Theme.of(context).colorScheme.onBackground.withOpacity(0.7),
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              'Activities near ${currentUser!.location.city}',
+                              style: TextStyle(
+                                color: Theme.of(context).colorScheme.onBackground.withOpacity(0.7),
+                                fontSize: 14,
                               ),
                             ),
+                          ],
+                        ),
+                      ),
+                    
+                    // Card swiper
+                    Expanded(
+                      child: CardSwiper(
+                        controller: controller,
+                        cardsCount: events.length,
+                        onSwipe: _onSwipe,
+                        onUndo: (int? previousIndex, int currentIndex,
+                            CardSwiperDirection direction) {
+                          // Handle undo if needed
+                          return true;
+                        },
+                        numberOfCardsDisplayed: 3,
+                        backCardOffset: const Offset(40, 40),
+                        padding: const EdgeInsets.all(24.0),
+                        cardBuilder: (
+                          context,
+                          index,
+                          horizontalThresholdPercentage,
+                          verticalThresholdPercentage,
+                        ) {
+                          return EventCard(
+                            event: events[index],
+                            onSuperLike: () => _handleSuperLike(events[index]),
                           );
                         },
                       ),
-                    ],
-                  ),
-                ),
-                
-                // Instructions
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 16),
-                  child: Text(
-                    'Swipe right if interested, left to pass, up for super like',
-                    style: TextStyle(
-                      color: Colors.grey[600],
-                      fontSize: 14,
                     ),
-                  ),
+                    
+                    // Action buttons
+                    Container(
+                      padding: const EdgeInsets.all(24),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          // Pass button
+                          AnimatedBuilder(
+                            animation: _buttonAnimation,
+                            builder: (context, child) {
+                              return Transform.scale(
+                                scale: _buttonAnimation.value,
+                                child: Container(
+                                  width: 60,
+                                  height: 60,
+                                  decoration: BoxDecoration(
+                                    color: Theme.of(context).colorScheme.surface,
+                                    shape: BoxShape.circle,
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Theme.of(context).colorScheme.primary.withOpacity(0.2),
+                                        blurRadius: 10,
+                                        offset: const Offset(0, 5),
+                                      ),
+                                    ],
+                                  ),
+                                  child: IconButton(
+                                    icon: const Icon(
+                                      Icons.close,
+                                      color: Colors.red,
+                                      size: 30,
+                                    ),
+                                    onPressed: _onTapPass,
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+                          
+                          // Undo button (if available)
+                          Container(
+                            width: 50,
+                            height: 50,
+                            decoration: BoxDecoration(
+                              color: Theme.of(context).colorScheme.surface,
+                              shape: BoxShape.circle,
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+                                  blurRadius: 8,
+                                  offset: const Offset(0, 3),
+                                ),
+                              ],
+                            ),
+                            child: IconButton(
+                              icon: Icon(
+                                Icons.undo,
+                                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
+                                size: 24,
+                              ),
+                              onPressed: () {
+                                controller.undo();
+                              },
+                            ),
+                          ),
+                          
+                          // Like button
+                          AnimatedBuilder(
+                            animation: _buttonAnimation,
+                            builder: (context, child) {
+                              return Transform.scale(
+                                scale: _buttonAnimation.value,
+                                child: Container(
+                                  width: 60,
+                                  height: 60,
+                                  decoration: BoxDecoration(
+                                    color: Theme.of(context).colorScheme.surface,
+                                    shape: BoxShape.circle,
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Theme.of(context).colorScheme.primary.withOpacity(0.2),
+                                        blurRadius: 10,
+                                        offset: const Offset(0, 5),
+                                      ),
+                                    ],
+                                  ),
+                                  child: IconButton(
+                                    icon: const Icon(
+                                      Icons.favorite,
+                                      color: Colors.green,
+                                      size: 30,
+                                    ),
+                                    onPressed: _onTapLike,
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+                        ],
+                      ),
+                    ),
+                    
+                    // Instructions
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 16),
+                      child: Text(
+                        'Swipe right if interested, left to pass, up for super like',
+                        style: TextStyle(
+                          color: Theme.of(context).colorScheme.onBackground.withOpacity(0.7),
+                          fontSize: 14,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-              ],
+    );
+  }
+
+  Widget _buildLoadingState() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          CircularProgressIndicator(
+            color: Theme.of(context).colorScheme.primary,
+          ),
+          const SizedBox(height: 16),
+          Text(
+            'Loading events...',
+            style: TextStyle(
+              color: Theme.of(context).colorScheme.onBackground,
             ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -350,7 +420,7 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen>
           Icon(
             Icons.explore_off,
             size: 80,
-            color: Colors.grey[400],
+            color: Theme.of(context).colorScheme.onBackground.withOpacity(0.5),
           ),
           const SizedBox(height: 16),
           Text(
@@ -358,7 +428,7 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen>
             style: TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.w600,
-              color: Colors.grey[600],
+              color: Theme.of(context).colorScheme.onBackground.withOpacity(0.8),
             ),
           ),
           const SizedBox(height: 8),
@@ -366,18 +436,14 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen>
             'Check back later for new activities!',
             style: TextStyle(
               fontSize: 16,
-              color: Colors.grey[500],
+              color: Theme.of(context).colorScheme.onBackground.withOpacity(0.6),
             ),
           ),
           const SizedBox(height: 24),
           ElevatedButton(
             onPressed: () {
-              ref.read(eventsProvider.notifier).loadEvents();
+              _loadEvents();
             },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Theme.of(context).primaryColor,
-              foregroundColor: Colors.white,
-            ),
             child: const Text('Refresh'),
           ),
         ],
@@ -491,7 +557,7 @@ class _CreateEventSheetState extends ConsumerState<CreateEventSheet> {
       source: EventSource.userCreated,
     );
 
-    ref.read(eventsProvider.notifier).addEvent(newEvent);
+    await ref.read(eventsProvider.notifier).addEvent(newEvent);
 
     setState(() {
       _isLoading = false;
@@ -515,9 +581,9 @@ class _CreateEventSheetState extends ConsumerState<CreateEventSheet> {
       maxChildSize: 0.95,
       minChildSize: 0.5,
       builder: (context, scrollController) => Container(
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.only(
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.surface,
+          borderRadius: const BorderRadius.only(
             topLeft: Radius.circular(20),
             topRight: Radius.circular(20),
           ),
@@ -536,7 +602,7 @@ class _CreateEventSheetState extends ConsumerState<CreateEventSheet> {
                     width: 40,
                     height: 4,
                     decoration: BoxDecoration(
-                      color: Colors.grey[300],
+                      color: Theme.of(context).colorScheme.onSurface.withOpacity(0.3),
                       borderRadius: BorderRadius.circular(2),
                     ),
                   ),
@@ -545,11 +611,12 @@ class _CreateEventSheetState extends ConsumerState<CreateEventSheet> {
                 const SizedBox(height: 20),
                 
                 // Title
-                const Text(
+                Text(
                   'Create Event',
                   style: TextStyle(
                     fontSize: 24,
                     fontWeight: FontWeight.bold,
+                    color: Theme.of(context).colorScheme.onSurface,
                   ),
                 ),
                 
@@ -558,13 +625,10 @@ class _CreateEventSheetState extends ConsumerState<CreateEventSheet> {
                 // Event Name
                 TextFormField(
                   controller: _nameController,
-                  decoration: InputDecoration(
+                  decoration: const InputDecoration(
                     labelText: 'Event Name',
                     hintText: 'What\'s happening?',
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    prefixIcon: const Icon(Icons.event),
+                    prefixIcon: Icon(Icons.event),
                   ),
                   validator: (value) {
                     if (value?.isEmpty ?? true) {
@@ -579,12 +643,9 @@ class _CreateEventSheetState extends ConsumerState<CreateEventSheet> {
                 // Category
                 DropdownButtonFormField<String>(
                   value: _selectedCategory,
-                  decoration: InputDecoration(
+                  decoration: const InputDecoration(
                     labelText: 'Category',
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    prefixIcon: const Icon(Icons.category),
+                    prefixIcon: Icon(Icons.category),
                   ),
                   items: _categories.map((category) {
                     return DropdownMenuItem(
@@ -605,13 +666,10 @@ class _CreateEventSheetState extends ConsumerState<CreateEventSheet> {
                 TextFormField(
                   controller: _descriptionController,
                   maxLines: 3,
-                  decoration: InputDecoration(
+                  decoration: const InputDecoration(
                     labelText: 'Description',
                     hintText: 'Tell people what to expect...',
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    prefixIcon: const Icon(Icons.description),
+                    prefixIcon: Icon(Icons.description),
                   ),
                   validator: (value) {
                     if (value?.isEmpty ?? true) {
@@ -626,13 +684,10 @@ class _CreateEventSheetState extends ConsumerState<CreateEventSheet> {
                 // Location
                 TextFormField(
                   controller: _locationController,
-                  decoration: InputDecoration(
+                  decoration: const InputDecoration(
                     labelText: 'Location',
                     hintText: 'Where is it happening?',
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    prefixIcon: const Icon(Icons.location_on),
+                    prefixIcon: Icon(Icons.location_on),
                   ),
                   validator: (value) {
                     if (value?.isEmpty ?? true) {
@@ -653,14 +708,18 @@ class _CreateEventSheetState extends ConsumerState<CreateEventSheet> {
                         child: Container(
                           padding: const EdgeInsets.all(16),
                           decoration: BoxDecoration(
-                            border: Border.all(color: Colors.grey),
+                            color: Theme.of(context).colorScheme.surface,
+                            border: Border.all(color: Theme.of(context).colorScheme.outline),
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: Row(
                             children: [
-                              const Icon(Icons.calendar_today),
+                              Icon(Icons.calendar_today, color: Theme.of(context).colorScheme.primary),
                               const SizedBox(width: 8),
-                              Text(DateFormat('MMM d, y').format(_selectedDate)),
+                              Text(
+                                DateFormat('MMM d, y').format(_selectedDate),
+                                style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
+                              ),
                             ],
                           ),
                         ),
@@ -673,14 +732,18 @@ class _CreateEventSheetState extends ConsumerState<CreateEventSheet> {
                         child: Container(
                           padding: const EdgeInsets.all(16),
                           decoration: BoxDecoration(
-                            border: Border.all(color: Colors.grey),
+                            color: Theme.of(context).colorScheme.surface,
+                            border: Border.all(color: Theme.of(context).colorScheme.outline),
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: Row(
                             children: [
-                              const Icon(Icons.access_time),
+                              Icon(Icons.access_time, color: Theme.of(context).colorScheme.primary),
                               const SizedBox(width: 8),
-                              Text(_selectedTime.format(context)),
+                              Text(
+                                _selectedTime.format(context),
+                                style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
+                              ),
                             ],
                           ),
                         ),
@@ -695,13 +758,10 @@ class _CreateEventSheetState extends ConsumerState<CreateEventSheet> {
                 TextFormField(
                   controller: _maxAttendeesController,
                   keyboardType: TextInputType.number,
-                  decoration: InputDecoration(
+                  decoration: const InputDecoration(
                     labelText: 'Max Attendees (Optional)',
                     hintText: 'Leave blank for unlimited',
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    prefixIcon: const Icon(Icons.people),
+                    prefixIcon: Icon(Icons.people),
                   ),
                 ),
                 
@@ -723,13 +783,10 @@ class _CreateEventSheetState extends ConsumerState<CreateEventSheet> {
                   TextFormField(
                     controller: _priceController,
                     keyboardType: TextInputType.number,
-                    decoration: InputDecoration(
+                    decoration: const InputDecoration(
                       labelText: 'Price (\$)',
                       hintText: '0.00',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      prefixIcon: const Icon(Icons.attach_money),
+                      prefixIcon: Icon(Icons.attach_money),
                     ),
                     validator: _isPaid ? (value) {
                       if (value?.isEmpty ?? true) {
@@ -751,13 +808,6 @@ class _CreateEventSheetState extends ConsumerState<CreateEventSheet> {
                   height: 50,
                   child: ElevatedButton(
                     onPressed: _isLoading ? null : _createEvent,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Theme.of(context).primaryColor,
-                      foregroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
                     child: _isLoading
                         ? const CircularProgressIndicator(color: Colors.white)
                         : const Text(

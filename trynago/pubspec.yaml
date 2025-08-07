@@ -34,7 +34,7 @@ dependencies:
   flutter_animate: ^4.3.0
   cached_network_image: ^3.3.0
   
-  # Date formatting
+  # Date formatting (missing dependency)
   intl: ^0.19.0
 
 dev_dependencies:
@@ -44,5 +44,5 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
-  assets:
-    - assets/images/
+  # assets:
+  #   - assets/images/

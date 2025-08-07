@@ -12,7 +12,7 @@ class MatchesScreen extends ConsumerWidget {
     final likedEvents = ref.watch(likedEventsProvider);
 
     return Scaffold(
-      backgroundColor: Colors.grey[50],
+      // Remove explicit background color to use theme
       appBar: AppBar(
         title: const Text(
           'Your Matches',
@@ -22,7 +22,7 @@ class MatchesScreen extends ConsumerWidget {
           ),
         ),
         centerTitle: true,
-        backgroundColor: Colors.white,
+        // Remove explicit backgroundColor to use theme
         elevation: 0,
       ),
       body: likedEvents.isEmpty
@@ -36,7 +36,7 @@ class MatchesScreen extends ConsumerWidget {
                     children: [
                       Icon(
                         Icons.favorite,
-                        color: Theme.of(context).primaryColor,
+                        color: Theme.of(context).colorScheme.primary,
                         size: 20,
                       ),
                       const SizedBox(width: 8),
@@ -44,7 +44,7 @@ class MatchesScreen extends ConsumerWidget {
                         '${likedEvents.length} event${likedEvents.length != 1 ? 's' : ''} you\'re interested in',
                         style: TextStyle(
                           fontSize: 16,
-                          color: Colors.grey[700],
+                          color: Theme.of(context).colorScheme.onBackground.withOpacity(0.8),
                           fontWeight: FontWeight.w500,
                         ),
                       ),
@@ -76,7 +76,7 @@ class MatchesScreen extends ConsumerWidget {
           Icon(
             Icons.favorite_border,
             size: 80,
-            color: Colors.grey[400],
+            color: Theme.of(context).colorScheme.onBackground.withOpacity(0.5),
           ),
           const SizedBox(height: 16),
           Text(
@@ -84,7 +84,7 @@ class MatchesScreen extends ConsumerWidget {
             style: TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.w600,
-              color: Colors.grey[600],
+              color: Theme.of(context).colorScheme.onBackground.withOpacity(0.8),
             ),
           ),
           const SizedBox(height: 8),
@@ -92,7 +92,7 @@ class MatchesScreen extends ConsumerWidget {
             'Start swiping to find activities you love!',
             style: TextStyle(
               fontSize: 16,
-              color: Colors.grey[500],
+              color: Theme.of(context).colorScheme.onBackground.withOpacity(0.6),
             ),
             textAlign: TextAlign.center,
           ),
@@ -102,14 +102,6 @@ class MatchesScreen extends ConsumerWidget {
               // Navigate to discover screen (assuming using go_router)
               // This would be handled by the bottom navigation
             },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Theme.of(context).primaryColor,
-              foregroundColor: Colors.white,
-              padding: const EdgeInsets.symmetric(
-                horizontal: 24,
-                vertical: 12,
-              ),
-            ),
             child: const Text('Start Discovering'),
           ),
         ],
@@ -121,11 +113,11 @@ class MatchesScreen extends ConsumerWidget {
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.1),
+            color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -213,10 +205,10 @@ class MatchesScreen extends ConsumerWidget {
                 // Event name
                 Text(
                   event.name,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
-                    color: Colors.black87,
+                    color: Theme.of(context).colorScheme.onSurface,
                   ),
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
@@ -230,14 +222,14 @@ class MatchesScreen extends ConsumerWidget {
                     Icon(
                       Icons.calendar_today_outlined,
                       size: 16,
-                      color: Colors.grey[600],
+                      color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
                     ),
                     const SizedBox(width: 6),
                     Text(
                       '${DateFormat('EEE, MMM d').format(event.date)} at ${event.time}',
                       style: TextStyle(
                         fontSize: 14,
-                        color: Colors.grey[700],
+                        color: Theme.of(context).colorScheme.onSurface.withOpacity(0.8),
                       ),
                     ),
                   ],
@@ -250,7 +242,7 @@ class MatchesScreen extends ConsumerWidget {
                     Icon(
                       Icons.location_on_outlined,
                       size: 16,
-                      color: Colors.grey[600],
+                      color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
                     ),
                     const SizedBox(width: 6),
                     Expanded(
@@ -258,7 +250,7 @@ class MatchesScreen extends ConsumerWidget {
                         event.location.address,
                         style: TextStyle(
                           fontSize: 14,
-                          color: Colors.grey[700],
+                          color: Theme.of(context).colorScheme.onSurface.withOpacity(0.8),
                         ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
@@ -274,14 +266,14 @@ class MatchesScreen extends ConsumerWidget {
                     Icon(
                       Icons.people_outlined,
                       size: 16,
-                      color: Colors.grey[600],
+                      color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
                     ),
                     const SizedBox(width: 6),
                     Text(
                       '${event.attendees} attending',
                       style: TextStyle(
                         fontSize: 14,
-                        color: Colors.grey[700],
+                        color: Theme.of(context).colorScheme.onSurface.withOpacity(0.8),
                       ),
                     ),
                     if (event.price != null) ...[
@@ -289,13 +281,13 @@ class MatchesScreen extends ConsumerWidget {
                       Icon(
                         Icons.attach_money,
                         size: 16,
-                        color: Colors.grey[600],
+                        color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
                       ),
                       Text(
                         '\${event.price!.toStringAsFixed(2)}',
                         style: TextStyle(
                           fontSize: 14,
-                          color: Colors.grey[700],
+                          color: Theme.of(context).colorScheme.onSurface.withOpacity(0.8),
                           fontWeight: FontWeight.w600,
                         ),
                       ),
@@ -313,19 +305,7 @@ class MatchesScreen extends ConsumerWidget {
                         onPressed: () {
                           _showEventDetails(context, event);
                         },
-                        style: OutlinedButton.styleFrom(
-                          side: BorderSide(color: Theme.of(context).primaryColor),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                        ),
-                        child: Text(
-                          'View Details',
-                          style: TextStyle(
-                            color: Theme.of(context).primaryColor,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
+                        child: const Text('View Details'),
                       ),
                     ),
                     const SizedBox(width: 12),
@@ -334,17 +314,7 @@ class MatchesScreen extends ConsumerWidget {
                         onPressed: () {
                           _handleJoinEvent(context, event, ref);
                         },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Theme.of(context).primaryColor,
-                          foregroundColor: Colors.white,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                        ),
-                        child: const Text(
-                          'Join Event',
-                          style: TextStyle(fontWeight: FontWeight.w600),
-                        ),
+                        child: const Text('Join Event'),
                       ),
                     ),
                   ],
@@ -367,9 +337,9 @@ class MatchesScreen extends ConsumerWidget {
         maxChildSize: 0.9,
         minChildSize: 0.5,
         builder: (context, scrollController) => Container(
-          decoration: const BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.only(
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.surface,
+            borderRadius: const BorderRadius.only(
               topLeft: Radius.circular(20),
               topRight: Radius.circular(20),
             ),
@@ -385,7 +355,7 @@ class MatchesScreen extends ConsumerWidget {
                     width: 40,
                     height: 4,
                     decoration: BoxDecoration(
-                      color: Colors.grey[300],
+                      color: Theme.of(context).colorScheme.onSurface.withOpacity(0.3),
                       borderRadius: BorderRadius.circular(2),
                     ),
                   ),
@@ -393,17 +363,19 @@ class MatchesScreen extends ConsumerWidget {
                 const SizedBox(height: 20),
                 Text(
                   event.name,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 24,
                     fontWeight: FontWeight.bold,
+                    color: Theme.of(context).colorScheme.onSurface,
                   ),
                 ),
                 const SizedBox(height: 16),
                 Text(
                   event.description,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 16,
                     height: 1.5,
+                    color: Theme.of(context).colorScheme.onSurface.withOpacity(0.8),
                   ),
                 ),
                 const SizedBox(height: 20),
@@ -412,32 +384,37 @@ class MatchesScreen extends ConsumerWidget {
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
-                    color: Colors.grey[800],
+                    color: Theme.of(context).colorScheme.onSurface,
                   ),
                 ),
                 const SizedBox(height: 12),
                 _buildDetailRow(
+                  context,
                   Icons.calendar_today_outlined,
                   'Date & Time',
                   '${DateFormat('EEEE, MMMM d, y').format(event.date)} at ${event.time}',
                 ),
                 _buildDetailRow(
+                  context,
                   Icons.location_on_outlined,
                   'Location',
                   event.location.address,
                 ),
                 _buildDetailRow(
+                  context,
                   Icons.people_outlined,
                   'Attendees',
                   '${event.attendees} attending${event.maxAttendees != null ? ' (${event.maxAttendees} max)' : ''}',
                 ),
                 if (event.price != null)
                   _buildDetailRow(
+                    context,
                     Icons.attach_money,
                     'Price',
                     '\${event.price!.toStringAsFixed(2)}',
                   ),
                 _buildDetailRow(
+                  context,
                   Icons.person_outlined,
                   'Organizer',
                   event.organizer,
@@ -450,13 +427,17 @@ class MatchesScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildDetailRow(IconData icon, String label, String value) {
+  Widget _buildDetailRow(BuildContext context, IconData icon, String label, String value) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(icon, size: 20, color: Colors.grey[600]),
+          Icon(
+            icon, 
+            size: 20, 
+            color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7)
+          ),
           const SizedBox(width: 12),
           Expanded(
             child: Column(
@@ -466,15 +447,16 @@ class MatchesScreen extends ConsumerWidget {
                   label,
                   style: TextStyle(
                     fontSize: 14,
-                    color: Colors.grey[600],
+                    color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
                     fontWeight: FontWeight.w500,
                   ),
                 ),
                 Text(
                   value,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
+                    color: Theme.of(context).colorScheme.onSurface,
                   ),
                 ),
               ],
