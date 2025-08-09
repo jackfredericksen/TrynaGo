@@ -44,7 +44,7 @@ class MatchesScreen extends ConsumerWidget {
                         '${likedEvents.length} event${likedEvents.length != 1 ? 's' : ''} you\'re interested in',
                         style: TextStyle(
                           fontSize: 16,
-                          color: Theme.of(context).colorScheme.onBackground.withOpacity(0.8),
+                          color: Theme.of(context).colorScheme.onSurface.withOpacity(0.8),
                           fontWeight: FontWeight.w500,
                         ),
                       ),
@@ -76,7 +76,7 @@ class MatchesScreen extends ConsumerWidget {
           Icon(
             Icons.favorite_border,
             size: 80,
-            color: Theme.of(context).colorScheme.onBackground.withOpacity(0.5),
+            color: Theme.of(context).colorScheme.onSurface.withOpacity(0.5),
           ),
           const SizedBox(height: 16),
           Text(
@@ -84,7 +84,7 @@ class MatchesScreen extends ConsumerWidget {
             style: TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.w600,
-              color: Theme.of(context).colorScheme.onBackground.withOpacity(0.8),
+              color: Theme.of(context).colorScheme.onSurface.withOpacity(0.8),
             ),
           ),
           const SizedBox(height: 8),
@@ -92,7 +92,7 @@ class MatchesScreen extends ConsumerWidget {
             'Start swiping to find activities you love!',
             style: TextStyle(
               fontSize: 16,
-              color: Theme.of(context).colorScheme.onBackground.withOpacity(0.6),
+              color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
             ),
             textAlign: TextAlign.center,
           ),

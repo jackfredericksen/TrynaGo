@@ -232,13 +232,13 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen>
                             Icon(
                               Icons.location_on,
                               size: 16,
-                              color: Theme.of(context).colorScheme.onBackground.withOpacity(0.7),
+                              color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
                             ),
                             const SizedBox(width: 4),
                             Text(
                               'Activities near ${currentUser!.location.city}',
                               style: TextStyle(
-                                color: Theme.of(context).colorScheme.onBackground.withOpacity(0.7),
+                                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
                                 fontSize: 14,
                               ),
                             ),
@@ -382,7 +382,7 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen>
                       child: Text(
                         'Swipe right if interested, left to pass, up for super like',
                         style: TextStyle(
-                          color: Theme.of(context).colorScheme.onBackground.withOpacity(0.7),
+                          color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
                           fontSize: 14,
                         ),
                       ),
@@ -404,7 +404,7 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen>
           Text(
             'Loading events...',
             style: TextStyle(
-              color: Theme.of(context).colorScheme.onBackground,
+              color: Theme.of(context).colorScheme.onSurface,
             ),
           ),
         ],
@@ -420,7 +420,7 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen>
           Icon(
             Icons.explore_off,
             size: 80,
-            color: Theme.of(context).colorScheme.onBackground.withOpacity(0.5),
+            color: Theme.of(context).colorScheme.onSurface.withOpacity(0.5),
           ),
           const SizedBox(height: 16),
           Text(
@@ -428,7 +428,7 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen>
             style: TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.w600,
-              color: Theme.of(context).colorScheme.onBackground.withOpacity(0.8),
+              color: Theme.of(context).colorScheme.onSurface.withOpacity(0.8),
             ),
           ),
           const SizedBox(height: 8),
@@ -436,7 +436,7 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen>
             'Check back later for new activities!',
             style: TextStyle(
               fontSize: 16,
-              color: Theme.of(context).colorScheme.onBackground.withOpacity(0.6),
+              color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
             ),
           ),
           const SizedBox(height: 24),
@@ -453,6 +453,8 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen>
 }
 
 class CreateEventSheet extends ConsumerStatefulWidget {
+  const CreateEventSheet({super.key});
+
   @override
   ConsumerState<CreateEventSheet> createState() => _CreateEventSheetState();
 }

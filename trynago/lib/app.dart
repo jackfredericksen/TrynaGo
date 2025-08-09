@@ -93,11 +93,9 @@ class TrynaGoApp extends ConsumerWidget {
         secondary: lightOrange,
         tertiary: paleOrange,
         surface: darkSurface,
-        background: darkBackground,
         onPrimary: Colors.black,
         onSecondary: Colors.black,
         onSurface: Colors.white,
-        onBackground: Colors.white,
         outline: darkBorder,
       ),
 
@@ -193,11 +191,11 @@ class TrynaGoApp extends ConsumerWidget {
         fillColor: darkCard,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: darkBorder),
+          borderSide: const BorderSide(color: darkBorder),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: darkBorder),
+          borderSide: const BorderSide(color: darkBorder),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
@@ -210,14 +208,14 @@ class TrynaGoApp extends ConsumerWidget {
 
       // Switch theme
       switchTheme: SwitchThemeData(
-        thumbColor: MaterialStateProperty.resolveWith<Color>((states) {
-          if (states.contains(MaterialState.selected)) {
+        thumbColor: WidgetStateProperty.resolveWith<Color>((states) {
+          if (states.contains(WidgetState.selected)) {
             return primaryOrange;
           }
           return Colors.grey[600]!;
         }),
-        trackColor: MaterialStateProperty.resolveWith<Color>((states) {
-          if (states.contains(MaterialState.selected)) {
+        trackColor: WidgetStateProperty.resolveWith<Color>((states) {
+          if (states.contains(WidgetState.selected)) {
             return primaryOrange.withOpacity(0.5);
           }
           return Colors.grey[800]!;
@@ -226,13 +224,13 @@ class TrynaGoApp extends ConsumerWidget {
 
       // Checkbox theme
       checkboxTheme: CheckboxThemeData(
-        fillColor: MaterialStateProperty.resolveWith<Color>((states) {
-          if (states.contains(MaterialState.selected)) {
+        fillColor: WidgetStateProperty.resolveWith<Color>((states) {
+          if (states.contains(WidgetState.selected)) {
             return primaryOrange;
           }
           return Colors.transparent;
         }),
-        checkColor: MaterialStateProperty.all(Colors.black),
+        checkColor: WidgetStateProperty.all(Colors.black),
         side: const BorderSide(color: Colors.white54),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(4),

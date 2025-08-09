@@ -282,7 +282,7 @@ class _EventCardState extends State<EventCard>
   }
 
   Widget _buildPhotoCarousel() {
-    return Container(
+    return SizedBox(
       height: 200,
       child: Stack(
         children: [
